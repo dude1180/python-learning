@@ -1,11 +1,34 @@
 import random
+import json
+import os
 
-stats = {
-    "tebak_main": 0,
-    "math_main": 0,
-    "high_score": 0,
-    "last_score": 0
-}
+stat_file = "save.json"
+def loadstats():
+    default = {
+        "tebak_main": 0,
+        "math_main": 0,
+        "high_score": 0,
+        "last_score": 0
+        }
+    if not os.path.exists(stat_file):
+        return default
+    try:
+        with open (stat_file, "r") as stat:
+            data = json.load(stat)
+        for key in default:
+            if key not in data:
+                data[key] = data[default]
+        return data
+    except (json.JSONDecodeError, OSError):
+        return default
+
+        
+    
+def save_file(data):
+    with open(stat_file, "w") as stat:
+        json.dump(data, stat, indent=4)
+
+stats = loadstats()
 
 def liat_stats():
     print(f"=== STATISTICS ===")
@@ -21,12 +44,12 @@ def liat_stats():
 
 def tebakangka():
     angkabenar = random.randint(1,100)
-    percobaan = 1
+    percobaan = 0
     while True:
         try:
             tebakan = int(input(f"""-- Tebak Angka --
 percobaan {percobaan}/10
-tebak angka 1-100:{angkabenar}"""))
+tebak angka 1-100:"""))
             if percobaan == 10 and tebakan != angkabenar:
                     print(f"u lost, angkanya: {angkabenar}")
                     print("kembali ke menu...")
@@ -106,6 +129,7 @@ Pilih menu:""")
     elif menu == "3":
         liat_stats()
     elif menu == "4":
+        save_file(stats)
         print("aight bye")
         break
     else:
