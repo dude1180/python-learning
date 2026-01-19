@@ -20,9 +20,10 @@ while True:
 2.tambah tugas
 3.selesaikan tugas
 4.hapus tugas
-5.keluar""")
+5.edit tugas
+6.keluar""")
     try:
-        pilihan = int(input("pilih [1/2/3/4/5?]:"))
+        pilihan = int(input("pilih [1-6?]:"))
         if pilihan == 1:
             print("DAFTAR TUGAS:")
             if not tugas_list:
@@ -80,10 +81,31 @@ while True:
             except ValueError:
                 print("masukan angka doang apalah!")
         elif pilihan == 5:
+            if not tugas_list:
+                print("belum ada tugas!")
+                continue
+            try:
+                update_num = int(input("masukan id tugas yg mau di edit:"))
+                found = False
+                for item in tugas_list:
+                    if item["id"] == update_num:
+                        print(f"tugas lama:{item['task']}")
+                        edit_tugas = input("edit ke (kosongkan jika batal):")
+                        if edit_tugas:
+                            item["task"] = edit_tugas
+                            save_data()
+                            print("tugas berhasil di edit!")
+                        found = True
+                if not found:
+                    print("id tidak ada!")
+            except ValueError:
+                print("masukan id berupa angka!")
+
+        elif pilihan == 6:
             print("ok, bye")
             break
         else:
-            print("1-5 doang apalah")
+            print("1-6 doang apalah")
     except ValueError:
          print("masukan angka!")
 
