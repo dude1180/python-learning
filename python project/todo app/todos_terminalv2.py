@@ -30,7 +30,7 @@ while True:
                 print("belum ada tugas")
             else:
                 for item in tugas_list:
-                    status = "[✓]" if item["done"] else "[]"
+                    status = "[✅]" if item["done"] else "[❌]"
                     print(f"{item['id']}. {status} {item['task']}")
         elif pilihan == 2:
             task = input("ketik tugasnya:")
