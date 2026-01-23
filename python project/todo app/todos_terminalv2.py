@@ -12,6 +12,43 @@ def load_data():
     except (json.JSONDecodeError, FileNotFoundError):
         tugas_list = []
 
+def liat_stats():
+    totals = len(tugas_list)
+    selesai = sum(1 for item in tugas_list if item["done"])
+    pending = totals - selesai
+
+    print(f"""====================
+STATS
+total tugas:{totals}
+✔:{selesai}
+✖:{pending} 
+====================""")
+    
+def new_id_generator():
+    if not tugas_list:
+        return 1
+    return max(item["id"] for item in tugas_list) + 1
+
+def cari_tugas():
+    if not tugas_list:
+        print("blm ada tugas, gada yg bisa di cari")
+        return
+    key_word = input("cari tugas apa?").lower()
+    print(f"hasil pencarian untuk {key_word}:")
+    hasil_pencarian = 0
+    found = False
+    for item in tugas_list:
+        if key_word in item["task"].lower():
+            status = "[✔]" if item["done"] else "[✖]"
+            print(f"{item['id']}. {status} {item['task']}")
+            hasil_pencarian += 1
+            found = True
+    print(f"menemukan:{hasil_pencarian} hasil yang cocok")
+    if not found:
+        print("tugas tidak ada")
+
+
+
 load_data()
 
 while True:
@@ -21,20 +58,22 @@ while True:
 3.selesaikan tugas
 4.hapus tugas
 5.edit tugas
-6.keluar""")
+6.cari tugas
+7.keluar""")
     try:
-        pilihan = int(input("pilih [1-6?]:"))
+        pilihan = int(input("pilih [1-7?]:"))
         if pilihan == 1:
+            liat_stats()
             print("DAFTAR TUGAS:")
             if not tugas_list:
                 print("belum ada tugas")
             else:
                 for item in tugas_list:
-                    status = "[✅]" if item["done"] else "[❌]"
+                    status = "[✔]" if item["done"] else "[✖]"
                     print(f"{item['id']}. {status} {item['task']}")
         elif pilihan == 2:
             task = input("ketik tugasnya:")
-            new_id = tugas_list[-1]["id"] + 1 if tugas_list else 1
+            new_id = new_id_generator()
             tugas_baru = {
                 "id": new_id,
                 "task": task,
@@ -100,12 +139,14 @@ while True:
                     print("id tidak ada!")
             except ValueError:
                 print("masukan id berupa angka!")
-
         elif pilihan == 6:
+            cari_tugas()
+
+        elif pilihan == 7:
             print("ok, bye")
             break
         else:
-            print("1-6 doang apalah")
+            print("1-7 doang apalah")
     except ValueError:
          print("masukan angka!")
 
