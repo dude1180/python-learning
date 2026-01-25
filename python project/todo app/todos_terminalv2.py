@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 file_data = "todos_datas.json"
 tugas_list = []
 def save_data():
@@ -29,25 +30,122 @@ def new_id_generator():
         return 1
     return max(item["id"] for item in tugas_list) + 1
 
+def validasi_tanggal(pesan):
+    while True:
+        input_tanggal = input(pesan)
+        if not input_tanggal or input_tanggal == "-":
+            return "-"
+        try:
+            datetime.strptime(input_tanggal, "%d-%m-%Y")
+            return input_tanggal
+        except ValueError:
+            print("tanggal tidak valid, pake format dd-mm-yyyy atau kosongkan!")
+ 
+
 def cari_tugas():
     if not tugas_list:
         print("blm ada tugas, gada yg bisa di cari")
         return
     key_word = input("cari tugas apa?").lower()
-    print(f"hasil pencarian untuk {key_word}:")
+    print(f"hasil pencarian untuk '{key_word}':")
     hasil_pencarian = 0
-    found = False
     for item in tugas_list:
         if key_word in item["task"].lower():
             status = "[✔]" if item["done"] else "[✖]"
             print(f"{item['id']}. {status} {item['task']}")
             hasil_pencarian += 1
-            found = True
     print(f"menemukan:{hasil_pencarian} hasil yang cocok")
-    if not found:
+    if hasil_pencarian == 0:
         print("tugas tidak ada")
 
+def liat_list():
+    liat_stats()
+    print("DAFTAR TUGAS:")
+    if not tugas_list:
+        print("belum ada tugas")
+    else:
+        for item in tugas_list:
+            status = "[✔]" if item["done"] else "[✖]"
+            print(f"{item['id']}. {status} {item['task']} | deadline: {item.get('deadline', '-')}")
 
+def tambah_tugas():
+    task = input("ketik tugasnya:")
+    deadline = validasi_tanggal("masukan deadline (dd-mm-yyyy) atau kosongkan:")
+    new_id = new_id_generator()
+    tugas_baru = {
+        "id" : new_id,
+        "task" : task,
+        "done" : False,
+        "deadline": deadline
+    }
+    tugas_list.append(tugas_baru)
+    save_data()
+    print(f"berhasil di tambahkan dengan id:{new_id}")
+
+def selesaikan_tugas():
+    if not tugas_list:
+        print("list kosong, gada yg bisa di selesaiin")
+        return
+    try:
+        target = int(input("masukan id tugas yg udh selesai:"))
+        found = False
+        for item in tugas_list:
+            if item["id"] == target:
+                item["done"] = True
+                found = True
+                save_data()
+                print(f"tugas {target} sudah selesai!")
+                break
+        if not found:
+            print("id tidak ada.")
+    except ValueError:
+        print("id berupa angka!!")
+
+def hapus_tugas():
+    if not tugas_list:
+        print("list kosong, gada yg bisa di hapus")
+        return
+    try:
+        nomor = int(input("nomor brp yg mau di hapus?:"))
+        found = False
+        for item in tugas_list:
+            if item["id"] == nomor:
+                tugas_list.remove(item)
+                found = True
+                save_data()
+                print(f"tugas {nomor} di hapus")
+                break
+        if not found:
+            print("tugas tidak ada di list!")
+    except ValueError:
+        print("masukan angka doang apalah!")
+
+def edit_tugas():
+    if not tugas_list:
+        print("belum ada tugas!")
+        return
+    try:
+        update_num = int(input("masukan id tugas yg mau di edit:"))
+        found = False
+        for item in tugas_list:
+            if item["id"] == update_num:
+                print(f"tugas lama:{item['task']}")
+                edit_nama_tugas = input("edit tugas ke (kosongkan jika tidak ingin ganti):")
+                if edit_nama_tugas:
+                    item["task"] = edit_nama_tugas
+                print(f"deadline lama:{item.get('deadline', '-')}")
+                edit_deadline = validasi_tanggal("edit deadline (dd-mm-yyyy) / kosongkan jika tidak ingin ganti:")
+                if edit_deadline != "-":
+                    item["deadline"] = edit_deadline
+                    
+                save_data()
+                print("tugas berhasil di edit!")
+                found = True
+                break
+        if not found:
+            print("id tidak ada!")
+    except ValueError:
+        print("masukan id berupa angka!")
 
 load_data()
 
@@ -63,82 +161,15 @@ while True:
     try:
         pilihan = int(input("pilih [1-7?]:"))
         if pilihan == 1:
-            liat_stats()
-            print("DAFTAR TUGAS:")
-            if not tugas_list:
-                print("belum ada tugas")
-            else:
-                for item in tugas_list:
-                    status = "[✔]" if item["done"] else "[✖]"
-                    print(f"{item['id']}. {status} {item['task']}")
+            liat_list()
         elif pilihan == 2:
-            task = input("ketik tugasnya:")
-            new_id = new_id_generator()
-            tugas_baru = {
-                "id": new_id,
-                "task": task,
-                "done": False
-            }
-            tugas_list.append(tugas_baru)
-            save_data()
-            print(f"berhasil di tambahkan dengan id:{new_id}")
+            tambah_tugas()
         elif pilihan == 3:
-            if not tugas_list:
-                print("list kosong, gada yg bisa di selesaiin")
-                continue
-            try:
-                target = int(input("masukan id tugas yg udh selesai:"))
-                found = False
-                for item in tugas_list:
-                    if item["id"] == target:
-                        item["done"] = True
-                        found = True
-                        save_data()
-                        print(f"tugas {target} sudah selesai!")
-                        break
-                if not found:
-                    print("id tidak ada.")
-            except ValueError:
-                print("id berupa angka!!")
-
+            selesaikan_tugas()
         elif pilihan == 4:
-            if not tugas_list:
-                print("list kosong, gada yg bisa di hapus")
-                continue
-            try:
-                nomor = int(input("nomor brp yg mau di hapus?:"))
-                found = False
-                for item in tugas_list:
-                    if item["id"] == nomor:
-                        tugas_list.remove(item)
-                        found = True
-                        save_data()
-                        print(f"tugas {nomor} di hapus")
-                        break
-                if not found:
-                    print("tugas tidak ada di list!")
-            except ValueError:
-                print("masukan angka doang apalah!")
+            hapus_tugas()
         elif pilihan == 5:
-            if not tugas_list:
-                print("belum ada tugas!")
-                continue
-            try:
-                update_num = int(input("masukan id tugas yg mau di edit:"))
-                found = False
-                for item in tugas_list:
-                    if item["id"] == update_num:
-                        print(f"tugas lama:{item['task']}")
-                        edit_tugas = input("edit ke (kosongkan jika batal):")
-                        if edit_tugas:
-                            item["task"] = edit_tugas
-                            save_data()
-                            print("tugas berhasil di edit!")
-                        found = True
-                if not found:
-                    print("id tidak ada!")
-            except ValueError:
-                print("masukan id berupa angka!")
+            edit_tugas()
         elif pilihan == 6:
             cari_tugas()
 
