@@ -13,6 +13,15 @@ def load_data():
     except (json.JSONDecodeError, FileNotFoundError):
         tugas_list = []
 
+def sorting_tanggal():
+    def ambil_deadline(item):
+        deadline = item.get("deadline", "-")
+        if deadline == "-":
+            return datetime.strptime("31-12-9999", "%d-%m-%Y")
+        return datetime.strptime(deadline, "%d-%m-%Y")
+    tugas_list.sort(key=ambil_deadline)
+    save_data()
+
 def liat_stats():
     totals = len(tugas_list)
     selesai = sum(1 for item in tugas_list if item["done"])
@@ -52,13 +61,14 @@ def cari_tugas():
     for item in tugas_list:
         if key_word in item["task"].lower():
             status = "[✔]" if item["done"] else "[✖]"
-            print(f"{item['id']}. {status} {item['task']}")
+            print(f"{item['id']}. {status} {item['task']} | deadline: {item.get('deadline', '-')}")
             hasil_pencarian += 1
     print(f"menemukan:{hasil_pencarian} hasil yang cocok")
     if hasil_pencarian == 0:
         print("tugas tidak ada")
 
 def liat_list():
+    sorting_tanggal()
     liat_stats()
     print("DAFTAR TUGAS:")
     if not tugas_list:
